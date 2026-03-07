@@ -1,4 +1,4 @@
-# CompMan: A Remote Computer Management Tool
+# Comp-trol: A Remote Computer Management Tool
 
 A multi-component remote administration and management system designed for host-client computer control. This project provides a desktop server application, a Windows-based client, and an alternative control interface through a NodeMCU (ESP8266).
 
