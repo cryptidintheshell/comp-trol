@@ -26,6 +26,7 @@ class Window : public wxFrame {
 	wxButton* restart_button;
 	wxButton* lock_button;
 	wxButton* close_program_button;
+	wxButton* send_file_button;
 
 	wxTextCtrl* update_field;
 
@@ -38,7 +39,7 @@ class Window : public wxFrame {
 	wxBoxSizer* main_sizer;
 	wxBoxSizer* buttons_panel_sizer;
 	wxBoxSizer* update_panel_sizer;
-	wxBoxSizer* cmd_panel_sizer;
+	wxStaticBoxSizer* cmd_panel_sizer;
 	wxBoxSizer* client_panel_sizer;
 	wxBoxSizer* vertical_sizer;
 

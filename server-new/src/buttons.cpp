@@ -68,7 +68,7 @@ void Window::SendFile(wxCommandEvent &event) {
     int rc = stat(fpath.c_str(), &stat_buf);
     int fsize = (rc == 0) ? stat_buf.st_size : -1;
 
-	send(current_socket, "993123", 6, 0);	// send file command id
+	send(current_socket, "993123", 6, 0);	// send file transfer signal
 	send(current_socket, fname.c_str(), sizeof(fname), 0);
 	send(current_socket, std::to_string(fsize).c_str(), sizeof(fsize), 0);
 

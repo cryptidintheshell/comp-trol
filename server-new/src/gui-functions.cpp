@@ -1,29 +1,36 @@
 void Window::SetupCommandButtons() {
 	cmd_panel = new wxPanel(main_panel, wxID_ANY);
-	std::vector<wxButton*> buttons;
-
-    std::vector<std::string> btn_labels = { "Shutdown", "Restart", "Lock", "Close programs", "Start", "Send file" };
-	std::vector<void(Window::*)(wxCommandEvent&)> buttonEvents = {
-	    &Window::OnButtonShutdown,
-	    &Window::OnButtonRestart,
-	    &Window::OnButtonLock,
-	    &Window::OnButtonClosePrograms,
-	    &Window::StartServer,
-	    &Window::SendFile
-	};
-
-	for (size_t i = 0; i < btn_labels.size(); i++) {
-		wxButton* btn = new wxButton(cmd_panel, wxID_ANY, btn_labels[i]);
-		btn->Bind(wxEVT_BUTTON, buttonEvents[i], this);
-		buttons.push_back(btn);
-	}
-
-	wxGridSizer* gridSizer = new wxGridSizer(3, 3, 5, 2);
-    for (wxButton* btn : buttons) {
-        gridSizer->Add(btn, 0);
-    } cmd_panel->SetSizer(gridSizer);
     
-    gridSizer->Fit(cmd_panel);
+    // Create the static box to give it a "panel style"
+    wxStaticBox* box = new wxStaticBox(cmd_panel, wxID_ANY, "Commands");
+    cmd_panel_sizer = new wxStaticBoxSizer(box, wxVERTICAL);
+
+    // Create the grid sizer for the buttons (the "table layout")
+    wxGridSizer* gridSizer = new wxGridSizer(2, 3, 5, 5); // 2 rows, 3 columns
+
+    shutdown_button = new wxButton(box, wxID_ANY, "Shutdown");
+    restart_button = new wxButton(box, wxID_ANY, "Restart");
+    lock_button = new wxButton(box, wxID_ANY, "Lock");
+    close_program_button = new wxButton(box, wxID_ANY, "Close programs");
+    start_button = new wxButton(box, wxID_ANY, "Start");
+    send_file_button = new wxButton(box, wxID_ANY, "Send file");
+
+    shutdown_button->Bind(wxEVT_BUTTON, &Window::OnButtonShutdown, this);
+    restart_button->Bind(wxEVT_BUTTON, &Window::OnButtonRestart, this);
+    lock_button->Bind(wxEVT_BUTTON, &Window::OnButtonLock, this);
+    close_program_button->Bind(wxEVT_BUTTON, &Window::OnButtonClosePrograms, this);
+    start_button->Bind(wxEVT_BUTTON, &Window::StartServer, this);
+    send_file_button->Bind(wxEVT_BUTTON, &Window::SendFile, this);
+
+    gridSizer->Add(shutdown_button, 1, wxEXPAND | wxALL, 2);
+    gridSizer->Add(restart_button, 1, wxEXPAND | wxALL, 2);
+    gridSizer->Add(lock_button, 1, wxEXPAND | wxALL, 2);
+    gridSizer->Add(close_program_button, 1, wxEXPAND | wxALL, 2);
+    gridSizer->Add(start_button, 1, wxEXPAND | wxALL, 2);
+    gridSizer->Add(send_file_button, 1, wxEXPAND | wxALL, 2);
+
+    cmd_panel_sizer->Add(gridSizer, 1, wxEXPAND | wxALL, 5);
+    cmd_panel->SetSizer(cmd_panel_sizer);
 }
 
 void Window::SetupUpdateField() {
