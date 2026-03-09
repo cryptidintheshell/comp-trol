@@ -1,72 +1,72 @@
 void Window::SetupCommandButtons() {
-	cmd_panel = new wxPanel(main_panel, wxID_ANY);
+	pnlCmd = new wxPanel(pnlMain, wxID_ANY);
     
     // Create the static box to give it a "panel style"
-    wxStaticBox* box = new wxStaticBox(cmd_panel, wxID_ANY, "Commands");
-    cmd_panel_sizer = new wxStaticBoxSizer(box, wxVERTICAL);
+    wxStaticBox* box = new wxStaticBox(pnlCmd, wxID_ANY, "Commands");
+    szrCmdPanel = new wxStaticBoxSizer(box, wxVERTICAL);
 
     // Create the grid sizer for the buttons (the "table layout")
     wxGridSizer* gridSizer = new wxGridSizer(2, 3, 5, 5); // 2 rows, 3 columns
 
-    shutdown_button = new wxButton(box, wxID_ANY, "Shutdown");
-    restart_button = new wxButton(box, wxID_ANY, "Restart");
-    lock_button = new wxButton(box, wxID_ANY, "Lock");
-    close_program_button = new wxButton(box, wxID_ANY, "Close programs");
-    start_button = new wxButton(box, wxID_ANY, "Start");
-    send_file_button = new wxButton(box, wxID_ANY, "Send file");
+    btnShutdown = new wxButton(box, wxID_ANY, "Shutdown");
+    btnRestart = new wxButton(box, wxID_ANY, "Restart");
+    btnLock = new wxButton(box, wxID_ANY, "Lock");
+    btnCloseProgram = new wxButton(box, wxID_ANY, "Close programs");
+    btnStart = new wxButton(box, wxID_ANY, "Start");
+    btnSendFile = new wxButton(box, wxID_ANY, "Send file");
 
-    shutdown_button->Bind(wxEVT_BUTTON, &Window::OnButtonShutdown, this);
-    restart_button->Bind(wxEVT_BUTTON, &Window::OnButtonRestart, this);
-    lock_button->Bind(wxEVT_BUTTON, &Window::OnButtonLock, this);
-    close_program_button->Bind(wxEVT_BUTTON, &Window::OnButtonClosePrograms, this);
-    start_button->Bind(wxEVT_BUTTON, &Window::StartServer, this);
-    send_file_button->Bind(wxEVT_BUTTON, &Window::SendFile, this);
+    btnShutdown->Bind(wxEVT_BUTTON, &Window::OnButtonShutdown, this);
+    btnRestart->Bind(wxEVT_BUTTON, &Window::OnButtonRestart, this);
+    btnLock->Bind(wxEVT_BUTTON, &Window::OnButtonLock, this);
+    btnCloseProgram->Bind(wxEVT_BUTTON, &Window::OnButtonClosePrograms, this);
+    btnStart->Bind(wxEVT_BUTTON, &Window::StartServer, this);
+    btnSendFile->Bind(wxEVT_BUTTON, &Window::SendFile, this);
 
-    gridSizer->Add(shutdown_button, 1, wxEXPAND | wxALL, 2);
-    gridSizer->Add(restart_button, 1, wxEXPAND | wxALL, 2);
-    gridSizer->Add(lock_button, 1, wxEXPAND | wxALL, 2);
-    gridSizer->Add(close_program_button, 1, wxEXPAND | wxALL, 2);
-    gridSizer->Add(start_button, 1, wxEXPAND | wxALL, 2);
-    gridSizer->Add(send_file_button, 1, wxEXPAND | wxALL, 2);
+    gridSizer->Add(btnShutdown, 1, wxEXPAND | wxALL, 2);
+    gridSizer->Add(btnRestart, 1, wxEXPAND | wxALL, 2);
+    gridSizer->Add(btnLock, 1, wxEXPAND | wxALL, 2);
+    gridSizer->Add(btnCloseProgram, 1, wxEXPAND | wxALL, 2);
+    gridSizer->Add(btnStart, 1, wxEXPAND | wxALL, 2);
+    gridSizer->Add(btnSendFile, 1, wxEXPAND | wxALL, 2);
 
-    cmd_panel_sizer->Add(gridSizer, 1, wxEXPAND | wxALL, 5);
-    cmd_panel->SetSizer(cmd_panel_sizer);
+    szrCmdPanel->Add(gridSizer, 1, wxEXPAND | wxALL, 5);
+    pnlCmd->SetSizer(szrCmdPanel);
 }
 
 void Window::SetupUpdateField() {
-	update_panel = new wxPanel(main_panel, wxID_ANY);
-	update_field = new wxTextCtrl(update_panel, wxID_ANY, "", wxDP, wxDS, wxTE_MULTILINE | wxTE_READONLY);
+	pnlUpdate = new wxPanel(pnlMain, wxID_ANY);
+	txtctrlUpdateField = new wxTextCtrl(pnlUpdate, wxID_ANY, "", wxDP, wxDS, wxTE_MULTILINE | wxTE_READONLY);
 	
-	update_panel_sizer = new wxBoxSizer(wxVERTICAL);
-	update_panel_sizer->Add(update_field, 1, wxEXPAND);
-	update_panel->SetSizer(update_panel_sizer);
+	szrUpdatePanel = new wxBoxSizer(wxVERTICAL);
+	szrUpdatePanel->Add(txtctrlUpdateField, 1, wxEXPAND);
+	pnlUpdate->SetSizer(szrUpdatePanel);
 }
 
 void Window::SetupGrid() {
-	client_panel = new wxPanel(main_panel, wxID_ANY);
-	clients_grid = new wxGrid(client_panel, wxID_ANY);
-	clients_grid->CreateGrid(0,2); // (row, column)
-	clients_grid->SetColLabelValue(0, "ID");
-	clients_grid->SetColLabelValue(1, "Address");
-	clients_grid->EnableEditing(false);
-	clients_grid->HideRowLabels();
-	clients_grid->Bind(wxEVT_GRID_SELECT_CELL, &Window::GridSelectHandler, this);
+	pnlClient = new wxPanel(pnlMain, wxID_ANY);
+	grdClients = new wxGrid(pnlClient, wxID_ANY);
+	grdClients->CreateGrid(0,2); // (row, column)
+	grdClients->SetColLabelValue(0, "ID");
+	grdClients->SetColLabelValue(1, "Address");
+	grdClients->EnableEditing(false);
+	grdClients->HideRowLabels();
+	grdClients->Bind(wxEVT_GRID_SELECT_CELL, &Window::GridSelectHandler, this);
 
-	client_panel_sizer = new wxBoxSizer(wxVERTICAL);
-	client_panel_sizer->Add(clients_grid, 1, wxEXPAND);
-	client_panel->SetSizer(client_panel_sizer);
+	szrClientPanel = new wxBoxSizer(wxVERTICAL);
+	szrClientPanel->Add(grdClients, 1, wxEXPAND);
+	pnlClient->SetSizer(szrClientPanel);
 
-	int grid_width = clients_grid->GetSize().GetWidth();
-	int id_col = clients_grid->GetColSize(0);
-	int addr_col = clients_grid->GetColSize(1);
+	int grid_width = grdClients->GetSize().GetWidth();
+	int id_col = grdClients->GetColSize(0);
+	int addr_col = grdClients->GetColSize(1);
 
-    clients_grid->SetColSize(1, addr_col + grid_width + (id_col * 2));
-	clients_grid->ForceRefresh();
+    grdClients->SetColSize(1, addr_col + grid_width + (id_col * 2));
+	grdClients->ForceRefresh();
 }
 
 void Window::GridSelectHandler(wxGridEvent &event) {
     int selectedRow = event.GetRow();
-    current_client = clients_grid->GetCellValue(selectedRow, 0);
+    current_client = grdClients->GetCellValue(selectedRow, 0);
     current_socket = client_sockets[selectedRow];
     printf("current socket selected%i\n", current_socket);
     event.Skip();

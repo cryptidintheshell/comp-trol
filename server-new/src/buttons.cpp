@@ -40,24 +40,26 @@ void Window::OnButtonClosePrograms(wxCommandEvent &event) {
 }
 
 void Window::Announcement(std::string msg) {
-	update_field->AppendText("[+] " + msg + "\n");
+	txtctrlUpdateField->AppendText("[+] " + msg + "\n");
 	printf("[+] %s\n", msg.c_str());
 }
 
 void Window::Error(std::string msg) {
-	update_field->AppendText("[!] " + msg + "\n");
+	txtctrlUpdateField->AppendText("[!] " + msg + "\n");
 	printf("[!] %s\n", msg.c_str());
 }
 
 void Window::AddContactToGrid(char* id, std::string ip) {
-    int rowCount = clients_grid->GetNumberRows();
+    int rowCount = grdClients->GetNumberRows();
 
-    clients_grid->AppendRows(1);
-	clients_grid->SetCellValue(rowCount, 0, id);
-	clients_grid->SetCellValue(rowCount, 1, ip);
+    grdClients->AppendRows(1);
+	grdClients->SetCellValue(rowCount, 0, id);
+	grdClients->SetCellValue(rowCount, 1, ip);
 }
 
 void Window::SendFile(wxCommandEvent &event) {
+	if (current_socket > 0) return;
+
 	wxFileDialog openFileDialog(this, "Open file", "", "", "Any files (*.*)|*.*|PNG (.png)|*.png", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	if (openFileDialog.ShowModal() == wxID_CANCEL) return; 
 

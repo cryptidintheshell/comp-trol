@@ -22,7 +22,7 @@ void Window::StartServer(wxCommandEvent &event) {
 }
 
 void Window::HandleIncomingConnection() {
-	// start_button->Enable(false);
+	// btnStart->Enable(false);
 
 	while (true) {
 
@@ -90,7 +90,7 @@ void Window::HandleClient(int socket, std::string ip, int pos) {
 
     {
     
-    clients_grid->DeleteRows(pos);
+    grdClients->DeleteRows(pos);
     client_mutex.lock();
     client_count--;
     client_mutex.unlock();
