@@ -13,6 +13,7 @@ void Window::StartServer(wxCommandEvent &event) {
 
 	Announcement("Socket was created.");
 	Announcement("Handling incoming connections.");
+	SetStatusText("Server Listening on Port 5953...");
 
 	std::thread connecting_handler_obj([this]() {
 		this->HandleIncomingConnection();
@@ -48,6 +49,7 @@ void Window::HandleIncomingConnection() {
 
 	        if (strlen(buffer) == 3) {	// check for client's id
 	            AddContactToGrid(buffer, client_ip);
+				AddClientCard(buffer, client_ip, client_socket);
 	        }
 
 			client_mutex.unlock();
@@ -56,6 +58,7 @@ void Window::HandleIncomingConnection() {
 		std::string ip(client_ip);
 
 		std::string msg = "A client connected: " + ip;
+		SetStatusText("New Client Connected: " + ip);
 		printf("client count: %i\n", client_count);
 		Announcement(msg);
 
@@ -80,6 +83,7 @@ void Window::HandleClient(int socket, std::string ip, int pos) {
         if (received == 0) {
         	std::string err = "Client " + ip + " disconnected from the server.";
             Error(err);
+			SetStatusText("Client Disconnected: " + ip);
             break;
         }
 
@@ -91,10 +95,11 @@ void Window::HandleClient(int socket, std::string ip, int pos) {
     {
     
     grdClients->DeleteRows(pos);
+	RemoveClientCard(socket);
     client_mutex.lock();
     client_count--;
+    client_sockets.erase(client_sockets.begin() + pos);
     client_mutex.unlock();
-    client_sockets.erase(client_sockets.begin() + socket);
 
     }
 

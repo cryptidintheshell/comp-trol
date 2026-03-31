@@ -16,16 +16,19 @@
 #include <sys/stat.h>
 #include <mutex>
 
+#include <wx/wrapsizer.h>
+#include <wx/statline.h>
+#include <wx/artprov.h>
+
 const auto wxDP = wxDefaultPosition;
 const auto wxDS = wxDefaultSize;
 
-class ClientComputer {
+struct ClientCard {
 	wxPanel* pnlContainer;
+	wxStaticBitmap* bmpIcon;
 	wxStaticText* stxtComputerName;
 	wxStaticText* stxtComputerIp;
-
-	int client_socket;
-	std::string client_name;
+	int socket;
 };
 
 class Window : public wxFrame {
@@ -44,6 +47,7 @@ class Window : public wxFrame {
 	wxPanel* pnlCmd;
 	wxPanel* pnlUpdate;
 	wxPanel* pnlClient;
+	wxScrolledWindow* pnlCards; // New panel for computer cards
 
 	wxBoxSizer* szrMain;
 	wxBoxSizer* szrButtonsPanel;
@@ -51,11 +55,11 @@ class Window : public wxFrame {
 	wxStaticBoxSizer* szrCmdPanel;
 	wxBoxSizer* szrClientPanel;
 	wxBoxSizer* szrVertical;
+	wxWrapSizer* szrCards; // Flow layout for cards
 
 	wxGrid* grdClients;
 
-	std::vector<ClientComputer> clients_computer;
-
+	std::vector<ClientCard> client_cards;
 	std::vector<int> client_sockets;
  	std::vector<std::string> client_address;
  	int client_count = 0;
@@ -85,8 +89,11 @@ public:
 	void SetupGrid();
 	void SetupCommandButtons();
 	void SetupUpdateField();
+	void SetupCardsPanel(); // Setup the top panel
 	void GridSelectHandler(wxGridEvent &event);
 	void AddContactToGrid(char* id, std::string ip);
+	void AddClientCard(const std::string& name, const std::string& ip, int socket);
+	void RemoveClientCard(int socket);
 
 	void Error(std::string msg);
 	void Announcement(std::string msg);

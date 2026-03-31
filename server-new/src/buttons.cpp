@@ -1,4 +1,8 @@
 void Window::OnButtonShutdown(wxCommandEvent &event) {
+	if (current_socket <= 0) {
+		Error("No client selected.");
+		return;
+	}
 	std::string cmd = "229892";
 	if (send(current_socket, cmd.c_str(), cmd.size(), 0) < 0) {
 		Error("Failed to send shutdown signal.");
@@ -10,6 +14,10 @@ void Window::OnButtonShutdown(wxCommandEvent &event) {
 }
 
 void Window::OnButtonLock(wxCommandEvent &event) {
+	if (current_socket <= 0) {
+		Error("No client selected.");
+		return;
+	}
 	std::string cmd = "837453";
 	if (send(current_socket, cmd.c_str(), cmd.size(), 0) < 0) {
 		Error("Failed to send lock signal.");
@@ -21,6 +29,10 @@ void Window::OnButtonLock(wxCommandEvent &event) {
 }
 
 void Window::OnButtonRestart(wxCommandEvent &event) {
+	if (current_socket <= 0) {
+		Error("No client selected.");
+		return;
+	}
 	std::string cmd = "893234";
 	if (send(current_socket, cmd.c_str(), cmd.size(), 0) < 0) {
 		Error("Failed to send restart signal.");
@@ -28,23 +40,30 @@ void Window::OnButtonRestart(wxCommandEvent &event) {
 	}
 
 	std::string msg = "Restart signal was sent to " + current_client;
-	Announcement(msg + "cmd: " + cmd);
+	Announcement(msg);
 }
 
 void Window::OnButtonClosePrograms(wxCommandEvent &event) {
+	if (current_socket <= 0) {
+		Error("No client selected.");
+		return;
+	}
 	std::string cmd = "764853";
 	if (send(current_socket, cmd.c_str(), cmd.size(), 0) < 0) {
 		Error("Failed to send close programs signal.");
 		return;
-	} Announcement("Close program signal was sent.");
+	} 
+	Announcement("Close programs signal was sent to " + current_client);
 }
 
 void Window::Announcement(std::string msg) {
+	txtctrlUpdateField->SetDefaultStyle(wxTextAttr(wxColour(50, 255, 50)));
 	txtctrlUpdateField->AppendText("[+] " + msg + "\n");
 	printf("[+] %s\n", msg.c_str());
 }
 
 void Window::Error(std::string msg) {
+	txtctrlUpdateField->SetDefaultStyle(wxTextAttr(wxColour(255, 50, 50)));
 	txtctrlUpdateField->AppendText("[!] " + msg + "\n");
 	printf("[!] %s\n", msg.c_str());
 }
@@ -55,10 +74,14 @@ void Window::AddContactToGrid(char* id, std::string ip) {
     grdClients->AppendRows(1);
 	grdClients->SetCellValue(rowCount, 0, id);
 	grdClients->SetCellValue(rowCount, 1, ip);
+	grdClients->AutoSizeColumns();
 }
 
 void Window::SendFile(wxCommandEvent &event) {
-	if (current_socket > 0) return;
+	if (current_socket <= 0) {
+		Error("No client selected.");
+		return;
+	}
 
 	wxFileDialog openFileDialog(this, "Open file", "", "", "Any files (*.*)|*.*|PNG (.png)|*.png", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	if (openFileDialog.ShowModal() == wxID_CANCEL) return; 
