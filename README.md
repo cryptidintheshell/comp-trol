@@ -39,17 +39,7 @@ An alternative hardware-based control interface.
 - **Real-time Monitoring:** The server tracks connection status and provides feedback on command execution.
 - **System Control:** Remote execution of shutdown, restart, and workstation locking.
 - **Cross-Platform Control:** Manage Windows clients from a Linux-based server or any device with a web browser (via NodeMCU).
-
-## Remote Command Codes
-
-**NOTE:** Connection & communication security will be implemented after the project's main functions are added
-The system uses specific numeric codes for communication between the server and clients.
-
-- **229892:** Shutdown system
-- **893234:** Restart system
-- **126773 / 837453:** Lock workstation
-- **764853:** Close programs (Server-side)
-- **993123:** File transfer initialization
+  
 
 ## Building the Project
 
