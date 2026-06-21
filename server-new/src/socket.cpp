@@ -23,9 +23,7 @@ void Window::StartServer(wxCommandEvent &event) {
 
 void Window::HandleIncomingConnection() {
 	// start_button->Enable(false);
-
 	while (true) {
-
 		struct sockaddr_in client_info;
 		socklen_t len = sizeof(client_info);
 		int client_socket = accept(server_socket, (struct sockaddr*) &client_info, &len);

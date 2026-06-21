@@ -20,7 +20,7 @@ void Window::SetupCommandButtons() {
 
 	wxGridSizer* gridSizer = new wxGridSizer(3, 3, 5, 2);
     for (wxButton* btn : buttons) {
-        gridSizer->Add(btn, 0);
+        gridSizer->Add(btn, 1, wxALL);
     } cmd_panel->SetSizer(gridSizer);
     
     gridSizer->Fit(cmd_panel);
