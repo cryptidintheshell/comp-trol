@@ -8,6 +8,8 @@
 #include <tlhelp32.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <fstream>
+#include <algorithm>
 
 
 using namespace std;
@@ -25,6 +27,7 @@ public:
 	void CreateSocket();
 	void ConnectToServer();
 	void ReceiveCommands();
+	void ReceiveFile();
 
 	void CheckCommand(char* cmd);
 	bool CheckProcess(std::string proc);

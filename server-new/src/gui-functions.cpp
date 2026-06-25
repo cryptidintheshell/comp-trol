@@ -39,7 +39,7 @@ void Window::SetupGrid() {
 	client_panel = new wxPanel(main_panel, wxID_ANY);
 	clients_grid = new wxGrid(client_panel, wxID_ANY);
 	clients_grid->CreateGrid(0,2); // (row, column)
-	clients_grid->SetColLabelValue(0, "ID");
+	clients_grid->SetColLabelValue(0, "Username");
 	clients_grid->SetColLabelValue(1, "Address");
 	clients_grid->EnableEditing(false);
 	clients_grid->HideRowLabels();

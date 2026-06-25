@@ -1,5 +1,17 @@
 #include "socket.h"
 
+bool recv_all(SOCKET socket, char* buffer, size_t size) {
+    size_t total_received = 0;
+    while (total_received < size) {
+        int received = recv(socket, buffer + total_received, size - total_received, 0);
+        if (received <= 0) {
+            return false;
+        }
+        total_received += received;
+    }
+    return true;
+}
+
 void Client::CreateSocket() {
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
 	    printf("Failed. Error Code: %d\n", WSAGetLastError());
@@ -23,9 +35,9 @@ void Client::CreateSocket() {
 		return;
 	}
 
-	u_long mode = 1; // 1 = non-blocking, 0 = blocking
+	u_long mode = 0; // 1 = non-blocking, 0 = blocking
     if (ioctlsocket(client_socket, FIONBIO, &mode) != 0) {
-        std::cerr << "Failed to set non-blocking mode! Error: " << WSAGetLastError() << "\n";
+        std::cerr << "Failed to set blocking mode! Error: " << WSAGetLastError() << "\n";
         closesocket(client_socket);
         WSACleanup();
         return;
@@ -78,9 +90,7 @@ void Client::ReceiveCommands() {
 		char buffer[1024] = {0};
 
 		int received = recv(client_socket, buffer, sizeof(buffer)-1, 0);  // Ensure space for null-termination
-		buffer[received] = '\0';
-
-		if (received == 0 || received == SOCKET_ERROR) {
+		if (received <= 0) {
 			Error("Disconnected from the server");
 			
 			while (true) {
@@ -94,10 +104,64 @@ void Client::ReceiveCommands() {
 
 		if (strcmp(buffer, "ping") == 0) {
 			send(client_socket, "pong", 4, 0);
+		} else if (strcmp(buffer, "993123") == 0) {
+			ReceiveFile();
 		} else {
 			CheckCommand(buffer);
 		}
 	}
+}
+
+void Client::ReceiveFile() {
+	// 1. Receive filename length (4 bytes)
+	uint32_t fname_len = 0;
+	if (!recv_all(client_socket, (char*)&fname_len, sizeof(fname_len))) {
+		Error("Failed to receive filename length");
+		return;
+	}
+
+	// 3. Receive filename
+	std::string fname(fname_len, '\0');
+	if (!recv_all(client_socket, &fname[0], fname_len)) {
+		Error("Failed to receive filename");
+		return;
+	}
+
+	// 4. Receive file size (8 bytes)
+	uint64_t file_size = 0;
+	if (!recv_all(client_socket, (char*)&file_size, sizeof(file_size))) {
+		Error("Failed to receive file size");
+		return;
+	}
+
+	Announcement("Receiving file: " + fname + " (" + to_string(file_size) + " bytes)");
+
+	// 5. Open local file for writing
+	std::ofstream file(fname, std::ios::binary);
+	if (!file.is_open()) {
+		Error("Failed to open local file for writing: " + fname);
+		return;
+	}
+
+	// 6. Receive file content in chunks
+	const size_t buffer_size = 4096;
+	char buffer[buffer_size];
+	uint64_t total_received = 0;
+
+	while (total_received < file_size) {
+		size_t to_read = min((uint64_t)buffer_size, file_size - total_received);
+		int received = recv(client_socket, buffer, to_read, 0);
+		if (received <= 0) {
+			Error("Connection lost during file transfer");
+			file.close();
+			return;
+		}
+		file.write(buffer, received);
+		total_received += received;
+	}
+
+	file.close();
+	Announcement("File " + fname + " received successfully.");
 }
 
 void Client::CheckCommand(char* cmd) {

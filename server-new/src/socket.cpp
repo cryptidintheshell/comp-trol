@@ -31,24 +31,21 @@ void Window::HandleIncomingConnection() {
 		inet_ntop(AF_INET, &client_info.sin_addr, client_ip, INET_ADDRSTRLEN);
 
 		{
-			client_mutex.lock();
+			std::lock_guard<std::mutex> lock(client_mutex);
 			client_sockets.push_back(client_socket);
 			client_count++;
 
-			char buffer[1024];
-			int received = recv(client_socket, buffer, sizeof(buffer), 0);
+			char buffer[1024] = {0};
+			int received = recv(client_socket, buffer, sizeof(buffer) - 1, 0);
 
-	        if (received <= 0) {
-	        	std::string err = "Server received this from " + std::string(client_ip) + " error code: " + std::to_string(received);
-	            Error(err);
-	            continue;
-	        }
+			if (received <= 0) {
+				std::string err = "Server received this from " + std::string(client_ip) + " error code: " + std::to_string(received);
+				Error(err);
+				continue;
+			}
 
-	        if (strlen(buffer) == 3) {	// check for client's id
-	            AddContactToGrid(buffer, client_ip);
-	        }
-
-			client_mutex.unlock();
+			buffer[received] = '\0';
+			AddContactToGrid(buffer, client_ip);
 		}
 
 		std::string ip(client_ip);
@@ -87,13 +84,19 @@ void Window::HandleClient(int socket, std::string ip, int pos) {
     }
 
     {
-    
-    clients_grid->DeleteRows(pos);
-    client_mutex.lock();
-    client_count--;
-    client_mutex.unlock();
-    client_sockets.erase(client_sockets.begin() + socket);
-
+        std::lock_guard<std::mutex> lock(client_mutex);
+        int index = -1;
+        for (size_t i = 0; i < client_sockets.size(); ++i) {
+            if (client_sockets[i] == socket) {
+                index = i;
+                break;
+            }
+        }
+        if (index != -1) {
+            clients_grid->DeleteRows(index);
+            client_sockets.erase(client_sockets.begin() + index);
+            client_count--;
+        }
     }
 
     close(socket);  
