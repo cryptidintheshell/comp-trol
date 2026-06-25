@@ -47,7 +47,7 @@ class Window : public wxFrame {
 	wxPanel* pnlCmd;
 	wxPanel* pnlUpdate;
 	wxPanel* pnlClient;
-	wxScrolledWindow* pnlCards; // New panel for computer cards
+	wxScrolledWindow* pnlCards;
 
 	wxBoxSizer* szrMain;
 	wxBoxSizer* szrButtonsPanel;
@@ -55,7 +55,7 @@ class Window : public wxFrame {
 	wxStaticBoxSizer* szrCmdPanel;
 	wxBoxSizer* szrClientPanel;
 	wxBoxSizer* szrVertical;
-	wxWrapSizer* szrCards; // Flow layout for cards
+	wxWrapSizer* szrCards;
 
 	wxGrid* grdClients;
 
@@ -63,8 +63,7 @@ class Window : public wxFrame {
 	std::vector<int> client_sockets;
  	std::vector<std::string> client_address;
  	int client_count = 0;
- 	
- 	// variables for client selected
+
  	int current_socket = -1;
  	std::string current_client = "";
 
@@ -89,7 +88,7 @@ public:
 	void SetupGrid();
 	void SetupCommandButtons();
 	void SetupUpdateField();
-	void SetupCardsPanel(); // Setup the top panel
+	void SetupCardsPanel();
 	void GridSelectHandler(wxGridEvent &event);
 	void AddContactToGrid(char* id, std::string ip);
 	void AddClientCard(const std::string& name, const std::string& ip, int socket);

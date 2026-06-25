@@ -7,7 +7,7 @@ Window::Window(const wxString &title, wxPoint wPoint, wxSize wSize)
 : wxFrame(NULL, wxID_ANY, title, wPoint, wSize) {
 	Bind(wxEVT_CLOSE_WINDOW, &Window::OnClose, this);
 	pnlMain = new wxPanel(this, wxID_ANY);
-	pnlMain->SetBackgroundColour(wxColour(45, 45, 48)); // Dark Grey background
+	pnlMain->SetBackgroundColour(wxColour(45, 45, 48));
 
 	SetupUpdateField();
 	SetupGrid();
@@ -25,9 +25,9 @@ Window::Window(const wxString &title, wxPoint wPoint, wxSize wSize)
 	szrMain = new wxBoxSizer(wxHORIZONTAL);
 	szrMain->Add(szrLogs, 1, wxEXPAND | wxALL, 10);
 	szrMain->Add(szrVertical, 1, wxEXPAND | wxALL, 10);
-	
+
 	pnlMain->SetSizer(szrMain);
-	
+
 	wxBoxSizer* frameSizer = new wxBoxSizer(wxVERTICAL);
 	frameSizer->Add(pnlMain, 1, wxEXPAND);
 	this->SetSizer(frameSizer);
