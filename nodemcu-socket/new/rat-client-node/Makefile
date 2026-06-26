@@ -1,2 +1,0 @@
-client.exe: socket.h main.cpp socket.cpp functions.cpp
-	x86_64-w64-mingw32-g++-posix -pthread main.cpp socket.h socket.cpp functions.cpp -o client.exe -lws2_32 -static-libgcc -static-libstdc++ -std=c++11 -static
