@@ -1,5 +1,4 @@
 void Window::StartServer(wxCommandEvent &event) {
-
 	server_address.sin_family = AF_INET;
 	server_address.sin_port = htons(5953);
 	server_address.sin_addr.s_addr = INADDR_ANY;
@@ -45,8 +44,22 @@ void Window::HandleIncomingConnection() {
 			}
 
 			buffer[received] = '\0';
-			AddContactToGrid(buffer, client_ip);
-			AddClientCard(buffer, client_ip, client_socket);
+			// Strip "username:" prefix if present
+			std::string username(buffer);
+			size_t prefix = username.find("username:");
+			if (prefix != std::string::npos) {
+		    username = username.substr(prefix + 9); // 9 = length of "username:"
+			}
+
+      CallAfter([this, username, client_ip, client_socket]() {
+        char buf[1024];
+        strncpy(buf, username.data(), sizeof(buf));
+        AddContactToGrid(buf, client_ip);
+        AddClientCard(username.data(), client_ip, client_socket);
+      });
+
+			// AddContactToGrid(username.data(), client_ip);
+			// AddClientCard(username.data(), client_ip, client_socket);
 		}
 
 		std::string ip(client_ip);
@@ -85,22 +98,27 @@ void Window::HandleClient(int socket, std::string ip, int pos) {
 		}
 	}
 
-	{
-		std::lock_guard<std::mutex> lock(client_mutex);
-		int index = -1;
-		for (size_t i = 0; i < client_sockets.size(); ++i) {
-			if (client_sockets[i] == socket) {
-				index = i;
-				break;
-			}
-		}
-		if (index != -1) {
-			grdClients->DeleteRows(index);
-			RemoveClientCard(socket);
-			client_sockets.erase(client_sockets.begin() + index);
-			client_count--;
-		}
-	}
+	CallAfter([this, socket, ip]() {
+	    std::lock_guard<std::mutex> lock(client_mutex);
+	    int index = -1;
+	    for (size_t i = 0; i < client_sockets.size(); ++i) {
+	        if (client_sockets[i] == socket) { index = i; break; }
+	    }
+	    if (index != -1) {
+	        grdClients->DeleteRows(index);
+	        grdClients->Refresh();
+	        grdClients->Update();
+
+	        RemoveClientCard(socket);
+	        szrCardsInner->Layout();
+	        pnlCards->FitInside();
+	        pnlCards->Refresh();
+
+	        client_sockets.erase(client_sockets.begin() + index);
+	        client_count--;
+	    }
+	    SetStatusText("Client Disconnected: " + ip);
+	});
 
 	close(socket);
 }

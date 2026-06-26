@@ -55,7 +55,11 @@ class Window : public wxFrame {
 	wxStaticBoxSizer* szrCmdPanel;
 	wxBoxSizer* szrClientPanel;
 	wxBoxSizer* szrVertical;
-	wxWrapSizer* szrCards;
+	wxWrapSizer* szrCardsInner;
+	wxBoxSizer* szrCards;
+
+	wxStaticBox* boxCards;
+	wxStaticBoxSizer* szrBoxCards;
 
 	wxGrid* grdClients;
 

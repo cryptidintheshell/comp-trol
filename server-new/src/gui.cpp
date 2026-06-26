@@ -15,7 +15,7 @@ Window::Window(const wxString &title, wxPoint wPoint, wxSize wSize)
 	SetupCardsPanel();
 
 	wxBoxSizer* szrLogs = new wxBoxSizer(wxVERTICAL);
-	szrLogs->Add(pnlCards, 0, wxEXPAND | wxBOTTOM, 10);
+	szrLogs->Add(pnlCards, 2, wxEXPAND | wxBOTTOM, 10);
 	szrLogs->Add(pnlUpdate, 1, wxEXPAND);
 
 	szrVertical = new wxBoxSizer(wxVERTICAL);

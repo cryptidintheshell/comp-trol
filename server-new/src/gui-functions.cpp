@@ -4,7 +4,7 @@ void Window::SetupCommandButtons() {
     pnlCmd = new wxPanel(pnlMain, wxID_ANY);
     pnlCmd->SetBackgroundColour(wxColour(45, 45, 48));
     
-    wxStaticBox* box = new wxStaticBox(pnlCmd, wxID_ANY, "Remote Control Commands");
+    wxStaticBox* box = new wxStaticBox(pnlCmd, wxID_ANY, "Remote Control Commands", wxDP, wxDS, wxALIGN_CENTRE_HORIZONTAL);
     box->SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
     box->SetForegroundColour(*wxWHITE);
     szrCmdPanel = new wxStaticBoxSizer(box, wxVERTICAL);
@@ -61,7 +61,7 @@ void Window::SetupUpdateField() {
     pnlUpdate = new wxPanel(pnlMain, wxID_ANY);
     pnlUpdate->SetBackgroundColour(wxColour(45, 45, 48));
     
-    wxStaticBox* box = new wxStaticBox(pnlUpdate, wxID_ANY, "System Logs");
+    wxStaticBox* box = new wxStaticBox(pnlUpdate, wxID_ANY, "System Logs", wxDP, wxDS, wxALIGN_CENTRE_HORIZONTAL);
     box->SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
     box->SetForegroundColour(*wxWHITE);
     wxStaticBoxSizer* boxSizer = new wxStaticBoxSizer(box, wxVERTICAL);
@@ -81,25 +81,34 @@ void Window::SetupUpdateField() {
 void Window::SetupCardsPanel() {
     pnlCards = new wxScrolledWindow(pnlMain, wxID_ANY, wxDP, wxSize(-1, 150));
     pnlCards->SetBackgroundColour(wxColour(35, 35, 38));
-    pnlCards->SetScrollRate(5, 5);
+    pnlCards->SetScrollRate(5, 0);  // horizontal scroll only
 
-    szrCards = new wxWrapSizer(wxHORIZONTAL);
+    boxCards = new wxStaticBox(pnlCards, wxID_ANY, "Clients");
+    boxCards->SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+    boxCards->SetForegroundColour(*wxWHITE);
+
+    szrCardsInner = new wxWrapSizer(wxHORIZONTAL);  // cards go in here
+
+    szrBoxCards = new wxStaticBoxSizer(boxCards, wxVERTICAL);
+    szrBoxCards->Add(szrCardsInner, 1, wxEXPAND | wxALL, 5);
+
+    szrCards = new wxBoxSizer(wxVERTICAL);
+    szrCards->Add(szrBoxCards, 1, wxEXPAND | wxALL, 5);
     pnlCards->SetSizer(szrCards);
 }
 
 void Window::AddClientCard(const std::string& name, const std::string& ip, int socket) {
-    wxPanel* card = new wxPanel(pnlCards, wxID_ANY, wxDP, wxSize(120, 130), wxBORDER_RAISED);
+    wxPanel* card = new wxPanel(boxCards, wxID_ANY, wxDP, wxSize(120, 130), wxBORDER_RAISED);
     card->SetBackgroundColour(wxColour(60, 60, 65));
 
     wxBoxSizer* cardSizer = new wxBoxSizer(wxVERTICAL);
 
     // Try to load icon
-    wxImage img;
+    wxImage img; // No image handler for type 15 defined.
     wxStaticBitmap* bmp;
     if (img.LoadFile("images/icon.png", wxBITMAP_TYPE_PNG)) {
         bmp = new wxStaticBitmap(card, wxID_ANY, wxBitmap(img.Scale(48, 48, wxIMAGE_QUALITY_HIGH)));
     } else {
-        // Fallback placeholder if image not found
         bmp = new wxStaticBitmap(card, wxID_ANY, wxArtProvider::GetBitmap(wxART_HARDDISK, wxART_OTHER, wxSize(48, 48)));
     }
 
@@ -125,7 +134,7 @@ void Window::AddClientCard(const std::string& name, const std::string& ip, int s
     cc.socket = socket;
 
     client_cards.push_back(cc);
-    szrCards->Add(card, 0, wxALL, 5);
+    szrCardsInner->Add(card, 0, wxALL, 5);
     
     pnlCards->Layout();
     pnlCards->FitInside();
@@ -136,25 +145,26 @@ void Window::RemoveClientCard(int socket) {
         if (it->socket == socket) {
             it->pnlContainer->Destroy();
             client_cards.erase(it);
-            break;
+            szrCardsInner->Layout();
+            pnlCards->FitInside();
+            return;
         }
     }
-    szrCards->Layout();
-    pnlCards->FitInside();
+    Error("No client card found for socket " + std::to_string(socket));
 }
 
 void Window::SetupGrid() {
     pnlClient = new wxPanel(pnlMain, wxID_ANY);
     pnlClient->SetBackgroundColour(wxColour(45, 45, 48));
     
-    wxStaticBox* box = new wxStaticBox(pnlClient, wxID_ANY, "Connected Clients");
+    wxStaticBox* box = new wxStaticBox(pnlClient, wxID_ANY, "Connected Clients", wxDP, wxDS, wxALIGN_CENTRE_HORIZONTAL);
     box->SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
     box->SetForegroundColour(*wxWHITE);
     wxStaticBoxSizer* boxSizer = new wxStaticBoxSizer(box, wxVERTICAL);
 
     grdClients = new wxGrid(box, wxID_ANY);
     grdClients->CreateGrid(0, 2);
-    grdClients->SetColLabelValue(0, "ID");
+    grdClients->SetColLabelValue(0, "Username");
     grdClients->SetColLabelValue(1, "IP Address");
     grdClients->EnableEditing(false);
     grdClients->HideRowLabels();
@@ -179,8 +189,12 @@ void Window::SetupGrid() {
     szrClientPanel->Add(boxSizer, 1, wxEXPAND);
     pnlClient->SetSizer(szrClientPanel);
 
-    grdClients->SetColSize(0, 80);
-    grdClients->SetColSize(1, 150);
+    grdClients->SetColSize(0, 100);
+    grdClients->Bind(wxEVT_SIZE, [this](wxSizeEvent& e) {
+        int remaining = grdClients->GetClientSize().GetWidth() - 100;
+        if (remaining > 0) grdClients->SetColSize(1, remaining);
+        e.Skip();
+    });
 }
 
 void Window::GridSelectHandler(wxGridEvent &event) {

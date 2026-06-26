@@ -10,7 +10,7 @@ bool send_all(int socket, const char* buffer, size_t size) {
 
 void Window::OnButtonShutdown(wxCommandEvent &event) {
 	if (current_socket <= 0) {
-		Error("No client selected.");
+		Error("No client selected. Please select a client first before.");
 		return;
 	}
 	std::string cmd = "229892";
@@ -117,7 +117,7 @@ void Window::SendFile(wxCommandEvent &event) {
 	dialogSizer->Add(panel, 1, wxEXPAND);
 	clientPathDialog->SetSizer(dialogSizer);
 
-	std::string path = "C:\\Users\\user\\Documents";	// default fallback
+	std::string path = "C:\\Users\\movements\\Documents";	// default fallback
 	if (clientPathDialog->ShowModal() == wxID_OK) {
 		std::string pathSelected = txtControl->GetValue().ToStdString();
 		if (!pathSelected.empty()) path = pathSelected;
@@ -146,20 +146,22 @@ void Window::SendFile(wxCommandEvent &event) {
 			Error("Failed to send filename length.");
 			return;
 		}
+
+		// send filename
 		if (!send_all(socket, fname.c_str(), fname_len)) {
 			Error("Failed to send filename.");
 			return;
 		}
 
 		// 4. Send path length (4 bytes) + path
-		if (!send_all(socket, (char*)&pathLength, sizeof(pathLength))) {
-			Error("Failed to send path length.");
-			return;
-		}
-		if (!send_all(socket, path.c_str(), pathLength)) {
-			Error("Failed to send path.");
-			return;
-		}
+		// if (!send_all(socket, (char*)&pathLength, sizeof(pathLength))) {
+		// 	Error("Failed to send path length.");
+		// 	return;
+		// }
+		// if (!send_all(socket, path.c_str(), pathLength)) {
+		// 	Error("Failed to send path.");
+		// 	return;
+		// }
 
 		// 5. Send file size (8 bytes)
 		uint64_t file_size_val = fsize;
